@@ -29,7 +29,7 @@ my %config = ( server1addr => \@efnetlist,
 	       pidfile => '/var/run/relayirc.pid'
 	       );	       
 
-my @channels = ( '#distributed', '#dcti', '#dcti-tunes', '#feline' );
+my @channels = ( '#distributed', '#dcti', '#dcti-tunes', '#feline', '#ktremain' );
 
 my %passwords = ( '#dcti' => 'itshotinatl',
 		  '#dcti-logs' => 'itshotinatl' );
