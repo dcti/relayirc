@@ -1,0 +1,4 @@
+This Perl script uses the Net::IRC package to maintain two
+simultaneous connections to two different IRC servers and forward
+traffic (primarily PRIVMSG and ACTION) in both directions.  The script
+can accomodate multiple channels.
