@@ -8,7 +8,9 @@ use strict;
 
 my @efnetlist = ( 'irc.mcs.net', 'irc.lightning.net', 'irc.prison.net',
 		  'irc.colorado.edu', 'irc.best.net', 'irc.plur.net',
-		  'ircd.east.gblx.net', 'irc.emory.edu', 'irc.ins.net.uk' );
+		  'ircd.east.gblx.net', 'ircd.west.gblx.net', 
+		  'irc.emory.edu', 'irc.ins.net.uk', 'irc.blackened.com',
+		  'irc.core.com', 'irc.mindspring.com', 'irc.stanford.edu' );
 
 my @cuckoonetlist = ( 'phobia.gildea.com', 'dazed.slacker.com' );
 
