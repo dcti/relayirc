@@ -102,11 +102,13 @@ for (;;) {
 
 	    if (time() - $conn1ping > $config{servertimeout}) {
 		warn "primary connection timed out";
+		$conn1->quit();
 		undef $conn1;
 		last;
 	    }
 	    if (time() - $conn2ping > $config{servertimeout}) {
 		warn "secondary connection timed out";
+		$conn2->quit();
 		undef $conn2;
 		last;
 	    }
@@ -241,9 +243,10 @@ sub on_relay_public_hook {
 sub on_relay_caction_hook {
     my ($self, $event) = @_;
     my $nick = $event->nick;
-    my $channel = $event->to;
+    my $channel = join(' ', $event->to);    # BUGBUG: $event->to
     my $text = join(' ', $event->args);
 
+    #warn "got action for $channel and $nick and $text";
     if ($self eq $conn1) {
 	$conn2->me($channel, 'indicates that ' . $nick . ' ' . $text);
     } elsif ($self eq $conn2) {
