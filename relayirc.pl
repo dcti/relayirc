@@ -16,7 +16,7 @@ my @efnetlist = ( 'irc.mcs.net', 'irc.lightning.net', 'irc.prison.net',
 my @cuckoonetlist = ( 'phobia.gildea.com', 'dazed.slacker.com', 'irc.kooks.net',
 		      'irc.followell.net', 'irc.ivo.nu' );
 
-my %config = ( server1addr => [ 'irc.ins.net.uk' ],   #\@efnetlist,
+my %config = ( server1addr => \@efnetlist,
 	       server1port => 6667,
 	       server2addr => \@cuckoonetlist,
 	       server2port => 6667,
