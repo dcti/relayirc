@@ -13,7 +13,8 @@ my @efnetlist = ( 'irc.mcs.net', 'irc.lightning.net', 'irc.prison.net',
 		  'irc.core.com', 'irc.mindspring.com', 'irc.stanford.edu',
 		  'irc.sprynet.com' );
 
-my @cuckoonetlist = ( 'phobia.gildea.com', 'dazed.slacker.com' );
+my @cuckoonetlist = ( 'phobia.gildea.com', 'dazed.slacker.com', 'irc.kooks.net',
+		      'irc.followell.net', 'irc.ivo.nu' );
 
 my %config = ( server1addr => [ 'irc.ins.net.uk' ],   #\@efnetlist,
 	       server1port => 6667,
