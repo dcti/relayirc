@@ -233,8 +233,10 @@ sub on_relay_public_hook {
     my $text = join(' ', $event->args);
 
     if ($self eq $conn1) {
+	$conn1ping = time();
 	$conn2->privmsg($channel, '<' . $nick . '> ' . $text);
     } elsif ($self eq $conn2) {
+	$conn2ping = time();
 	$conn1->privmsg($channel, '<' . $nick . '> ' . $text);
     } else {
 	warn "ignoring public relay";
