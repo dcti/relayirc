@@ -23,7 +23,7 @@ my %config = ( server1addr => [ 'irc.ins.net.uk' ],   #\@efnetlist,
 	       ircname => "distributed.net channel relayer",
 	       username => 'relayirc',
 	       consoledebug => 1,
-	       servertimeout => 15*60,
+	       servertimeout => 18*60,
 	       bindaddr => 'nodezero.distributed.net',
 	       pidfile => '/var/run/relayirc.pid'
 	       );	       
@@ -160,10 +160,10 @@ sub connectserver
     $oneconn->add_handler('crping', \&on_ping_reply);
     $oneconn->add_handler('invite', \&on_invite);
     
-    $oneconn->add_handler('ping', \&on_server_ping_hook, 2);
-    $oneconn->add_handler('msg', \&on_server_ping_hook, 2);
-    $oneconn->add_handler('public', \&on_server_ping_hook, 2);
-    $oneconn->add_handler('caction', \&on_server_ping_hook, 2);
+    $oneconn->add_handler('ping', \&on_activity_ping_hook, 2);
+    $oneconn->add_handler('msg', \&on_activity_ping_hook, 2);
+    #$oneconn->add_handler('public', \&on_activity_ping_hook, 2);
+    #$oneconn->add_handler('caction', \&on_activity_ping_hook, 2);
 
     $oneconn->add_handler('public', \&on_relay_public_hook, 2);
     $oneconn->add_handler('caction', \&on_relay_caction_hook, 2);
@@ -248,8 +248,10 @@ sub on_relay_caction_hook {
 
     #warn "got action for $channel and $nick and $text";
     if ($self eq $conn1) {
+	$conn1ping = time();
 	$conn2->me($channel, 'indicates that ' . $nick . ' ' . $text);
     } elsif ($self eq $conn2) {
+	$conn2ping = time();
 	$conn1->me($channel, 'indicates that ' . $nick . ' ' . $text);
     } else {
 	warn "ignoring caction relay";
@@ -257,18 +259,20 @@ sub on_relay_caction_hook {
 }
 
 
-# Minimal post-event hook to catch server PING/PONG events.
-sub on_server_ping_hook {
+# Minimal post-event hook to catch activity and reset timeouts.
+sub on_activity_ping_hook {
     my ($self, $event) = @_;
-    print STDERR "*** Server PING request received\n"
-	if $config{consoledebug};
 
     if ($self eq $conn1) {
+	print STDERR "*** Activity for primary server received\n"
+	    if $config{consoledebug};
 	$conn1ping = time();
     } elsif ($self eq $conn2) {
+	print STDERR "*** Activity for secondary server received\n"
+	    if $config{consoledebug};
 	$conn2ping = time();
     } else {
-	warn "unknown self reference";
+	warn "unknown self reference in activity ping hook";
     }
 }
 
