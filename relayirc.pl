@@ -16,16 +16,17 @@ my %config = ( server1addr => \@efnetlist,
 	       server1port => 6667,
 	       server2addr => \@cuckoonetlist,
 	       server2port => 6667,
-	       bindaddr => '10.20.0.20',
 	       nick => 'dctirelay',
 	       ircname => "distributed.net channel relayer",
 	       username => 'relayirc',
 	       consoledebug => 1,
 	       servertimeout => 15*60,
+	       bindaddr => 'nodezero.distributed.net',
 	       pidfile => '/var/run/relayirc.pid'
 	       );	       
 
-my @channels = ( '#feline' );  #( '#distributed', '#dcti', '#dcti-tunes', '#feline' );
+my @channels = ( '#feline' );  
+#( '#distributed', '#dcti', '#dcti-tunes', '#feline' );
 
 my %passwords = ( '#dcti' => 'itshotinatl',
 		  '#dcti-logs' => 'itshotinatl' );
@@ -74,7 +75,7 @@ for (;;) {
 	$conn1 = &connectserver( &selectrandom(@{$config{server1addr}}), 
 				 $config{server1port} )
 	    or next;
-	$conn1ping = time();       
+	$conn1ping = time();
     }
 
 
@@ -96,8 +97,6 @@ for (;;) {
 	       $conn2 && $conn2->connected())
 	{
 	    $irc->do_one_loop;
-	    &check_listeners();
-	    &check_clients();
 
 	    if (time() - $conn1ping < $config{servertimeout}) {
 		undef $conn1;
@@ -137,7 +136,7 @@ sub connectserver
 				Ircname  => $config{ircname},
 				Username => $config{username},
 				LocalAddr => $config{bindaddr});
-    if (!$conn1 || !$conn1->connected()) {
+    if (!$oneconn || !$oneconn->connected()) {
 	warn "Can't connect to IRC server.\n";
 	return undef;
     }
