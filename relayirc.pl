@@ -10,11 +10,12 @@ my @efnetlist = ( 'irc.mcs.net', 'irc.lightning.net', 'irc.prison.net',
 		  'irc.colorado.edu', 'irc.best.net', 'irc.plur.net',
 		  'ircd.east.gblx.net', 'ircd.west.gblx.net', 
 		  'irc.emory.edu', 'irc.ins.net.uk', 'irc.blackened.com',
-		  'irc.core.com', 'irc.mindspring.com', 'irc.stanford.edu' );
+		  'irc.core.com', 'irc.mindspring.com', 'irc.stanford.edu',
+		  'irc.sprynet.com' );
 
 my @cuckoonetlist = ( 'phobia.gildea.com', 'dazed.slacker.com' );
 
-my %config = ( server1addr => \@efnetlist,
+my %config = ( server1addr => [ 'irc.ins.net.uk' ],   #\@efnetlist,
 	       server1port => 6667,
 	       server2addr => \@cuckoonetlist,
 	       server2port => 6667,
@@ -27,8 +28,7 @@ my %config = ( server1addr => \@efnetlist,
 	       pidfile => '/var/run/relayirc.pid'
 	       );	       
 
-my @channels = ( '#feline' );  
-#( '#distributed', '#dcti', '#dcti-tunes', '#feline' );
+my @channels = ( '#distributed', '#dcti', '#dcti-tunes', '#feline' );
 
 my %passwords = ( '#dcti' => 'itshotinatl',
 		  '#dcti-logs' => 'itshotinatl' );
@@ -73,7 +73,7 @@ for (;;) {
     sleep 2;
 
     #  Create the IRC Connection objects to the first server.
-    if (!$conn1 || !$conn1->connected()) {
+    if (!defined $conn1 || !$conn1->connected()) {
 	$conn1 = &connectserver( &selectrandom(@{$config{server1addr}}), 
 				 $config{server1port} )
 	    or next;
@@ -82,7 +82,7 @@ for (;;) {
 
 
     #  Create the IRC Connection objects to the second server.
-    if (!$conn2 || !$conn2->connected()) {
+    if (!defined $conn2 || !$conn2->connected()) {
 	$conn2 = &connectserver( &selectrandom(@{$config{server2addr}}), 
 				 $config{server2port} )
 	    or next;
@@ -95,16 +95,18 @@ for (;;) {
 	if $config{consoledebug};
 
     eval {
-	while ($conn1 && $conn1->connected() && 
-	       $conn2 && $conn2->connected())
+	while (defined $conn1 && $conn1->connected() && 
+	       defined $conn2 && $conn2->connected())
 	{
 	    $irc->do_one_loop;
 
-	    if (time() - $conn1ping < $config{servertimeout}) {
+	    if (time() - $conn1ping > $config{servertimeout}) {
+		warn "primary connection timed out";
 		undef $conn1;
 		last;
 	    }
-	    if (time() - $conn2ping < $config{servertimeout}) {
+	    if (time() - $conn2ping > $config{servertimeout}) {
+		warn "secondary connection timed out";
 		undef $conn2;
 		last;
 	    }
@@ -161,8 +163,8 @@ sub connectserver
     $oneconn->add_handler('public', \&on_server_ping_hook, 2);
     $oneconn->add_handler('caction', \&on_server_ping_hook, 2);
 
-    $oneconn->add_handler('msg', \&on_msg_hook, 2);
-    $oneconn->add_handler('caction', \&on_caction_hook, 2);
+    $oneconn->add_handler('public', \&on_relay_public_hook, 2);
+    $oneconn->add_handler('caction', \&on_relay_caction_hook, 2);
     
     $oneconn->add_global_handler(376, \&on_connect);
     $oneconn->add_global_handler(433, \&on_nick_taken);
@@ -226,14 +228,12 @@ sub on_relay_public_hook {
     my ($self, $event) = @_;
     my $nick = $event->nick;
     my $channel = $event->to;
-    my @args = $event->args;
+    my $text = join(' ', $event->args);
 
     if ($self eq $conn1) {
-	$conn2->privmsg($channel, '<' . $nick . '> ' . 
-			join(' ', @args[1..$#args]));
+	$conn2->privmsg($channel, '<' . $nick . '> ' . $text);
     } elsif ($self eq $conn2) {
-	$conn1->privmsg($channel, '<' . $nick . '> ' . 
-			join(' ', @args[1..$#args]));
+	$conn1->privmsg($channel, '<' . $nick . '> ' . $text);
     } else {
 	warn "ignoring public relay";
     }
@@ -242,14 +242,12 @@ sub on_relay_caction_hook {
     my ($self, $event) = @_;
     my $nick = $event->nick;
     my $channel = $event->to;
-    my @args = $event->args;
+    my $text = join(' ', $event->args);
 
     if ($self eq $conn1) {
-	$conn2->me($channel, 'indicates that ' . $nick . ' ' .
-		   join(' ', @args[1..$#args]));
+	$conn2->me($channel, 'indicates that ' . $nick . ' ' . $text);
     } elsif ($self eq $conn2) {
-	$conn1->me($channel, 'indicates that ' . $nick . ' ' .
-		   join(' ', @args[1..$#args]));
+	$conn1->me($channel, 'indicates that ' . $nick . ' ' . $text);
     } else {
 	warn "ignoring caction relay";
     }
