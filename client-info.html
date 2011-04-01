@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+ <head>
+  <title>cuckoo.com | irc | network relay</title>
+<!-- $Id: include_header.php,v 1.3 2003/01/29 08:14:00 dbaker Exp $ -->
+
+<h1>Network Relay</h1>
+
+<h2>Overview</h2>
+<p>
+CuckooNET is the official home of #distributed, the distributed.net IRC channel.
+#distributed has migrated to CuckooNET from efnet, where it has lived since January
+1997.  In order to ease the transition, #distributed (and the various other
+distributed.net channels) are currently dual-homed on both efnet and CuckooNET.
+</p>
+<p>
+The dctirelay bot exists on both networks and relays channel traffic between the
+two networks.  This allows users on either network the simplest method of cross-network
+communication.
+</p>
+
+<h2>Simplifying Use</h2>
+<p>
+The scripts below will make the relay less obtrusive.  Since IRC display and formatting
+is a very personal aspect of your client configuration, there are several flavors of 
+script for some IRC client software.  Please experiment to see which style best suits
+you.
+</p>
+
+  <h2>BitchX</h2>
+  <pre>
+    # these triggers make the efnet<-->cuckoonet dctirelay operation
+    # more transparent.  users on the other side of the relay are only
+    # distinguishable by the color of the line now.
+    #
+    # ditch the "[$Z]" parts if you don't use timestamps.
+
+    on ^public "dctirelay %" {
+      /echo [$Z]$2 $3-
+    }
+    on ^action "dctirelay %" {
+      /echo [$Z]<$4->
+    }
+
+       - nugget@distributed.net
+  </pre>
+
+  <h2>epic</h2>
+  <pre>
+    on ^public "dctirelay #distributed *" {xecho -w $winchan($1) $2-}
+    on ^action "dctirelay #distributed indicates that *" {xecho -w $winchan($1) * $4-}
+
+       - Q-
+  </pre>
+
+  <h2>mIRC</h2>
+  <pre>
+    on ^1:TEXT:<*>*:#distributed:if ($nick == dctirelay) { echo #distributed $1- | haltdef }
+    on ^1:ACTION:*indicates that*:#distributed: if ($nick == dctirelay) { /echo #distributed * $3- | haltdef }
+
+       - Lithron
+
+    on ^1:TEXT:<*>*:#distributed:if ($nick == dctirelay) { /echo -t #distributed $1- | haltdef }
+    on ^1:ACTION:*indicates that*:#distributed: if ($nick == dctirelay) { /echo 6 -t #distributed * $3- | haltdef }
+
+       - Alternate syntax from Sponge with color/timestamp support
+
+    on ^1:TEXT:<*>*:#:if ($nick == dctirelay) { /echo -t [ $chan ] D $+ $1-  | haltdef }
+    on ^1:ACTION:*indicates that*:#: if ($nick == dctirelay) { /echo 6 -t [ $chan ] D $+ * $3- | haltdef }
+
+       - Froggie (prefixes all irc.d.net messages with a single D and
+                  not limited to just #distributed.)
+
+  </pre>
+
+ </body>
+</html>
+<!-- $Id: include_footer.php,v 1.3 2003/01/27 03:51:42 dbaker Exp $ -->
+
+<!-- $Id: dctirelay.php,v 1.3 2003/01/29 08:14:01 dbaker Exp $ -->
